@@ -95,7 +95,14 @@ def get_data_from_ganglia():
     # If host is not fully qualified, add the default domain
     if not '.' in host:
         host = host + '.' + current_app.config['CE_DASHBOARD_DEFAULT_CE_DOMAIN']
-    df=pd.read_csv('https://display.ospool.osg-htc.org/ganglia/graph.php?r=' + r + '&hreg[]=' + host + '&mreg[]=%5E' + 'Cpus' + '&mreg[]=%5E' + 'Gpus' + '&mreg[]=%5E' + 'Memory' + '&mreg[]=%5E' + 'Disk' + '&mreg[]=%5E' + 'Bcus' + '&aggregate=1&csv=1',skipfooter=1,engine='python')
+    df=pd.read_csv(f'https://display.ospool.osg-htc.org/ganglia/graph.php?r={r}&hreg[]={host}' 
+                   '&mreg[]=%5ECpus' 
+                   '&mreg[]=%5EGpus' 
+                   '&mreg[]=%5EMemory' 
+                   '&mreg[]=%5EDisk' 
+                   '&mreg[]=%5EBcus' 
+                   '&mreg[]=%5ETotalTransfer' 
+                   '&aggregate=1&csv=1',skipfooter=1,engine='python')
 
     # Transpose the data received from ganglia into the format we need for the CE Dashboard frontend
 
@@ -137,6 +144,8 @@ def get_data_from_ganglia():
     df['Project'] = df['Project'].str.replace('____meta_DiskNotIn', 'DiskUnallocated')
     df['Project'] = df['Project'].str.replace('____meta_BcusIn', 'BcusAllocated')
     df['Project'] = df['Project'].str.replace('____meta_BcusNotIn', 'BcusUnallocated')
+    df['Project'] = df['Project'].str.replace('____meta_TotalTransferInputMB', 'TotalTransferInputMB')
+    df['Project'] = df['Project'].str.replace('____meta_TotalTransferOutputMB', 'TotalTransferOutputMB')
     # Get rid of columns that are not needed; specifically, we don't want info per user, just per project   
     df.drop(columns=['Cpus_User'],inplace=True,errors='ignore')
     df.drop(columns=['Memory_User'],inplace=True,errors='ignore')
